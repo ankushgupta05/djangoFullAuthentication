@@ -3,6 +3,9 @@
 pip install django
 django-admin startproject djangoauthapi
 python manage.py startapp account
+python manage.py makemigrations
+python manage.py migrate
+
 ```
 
 # DRD
@@ -66,6 +69,21 @@ pip install django-cors-headers
 # make environment file .env
 ```
 # pip install python-dotenv
+
+
+```
+
+
+
+
+# custom auth model for auth
+```
+https://docs.djangoproject.com/en/5.2/topics/auth/customizing/
+
+
+
+https://docs.djangoproject.com/en/5.2/topics/auth/customizing/#a-full-example
+
 
 
 ```

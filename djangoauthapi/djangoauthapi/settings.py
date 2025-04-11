@@ -143,6 +143,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
+AUTH_USER_MODEL = "account.User"  # use user table of the account which we have created custom model in account app
+
+
+
 
 
 # Django project settings.py
