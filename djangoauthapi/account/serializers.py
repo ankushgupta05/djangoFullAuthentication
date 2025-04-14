@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from account.models import User
 from account.Utils import Util 
+from rest_framework.exceptions import ValidationError
+
 
 from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -74,6 +76,7 @@ class SendPasswordResetEmailViewSerializer(serializers.ModelSerializer):
     
     def validate(self,attrs):
         email = attrs.get('email')
+        print('yes\n\n')
         if User.objects.filter(email=email).exists():
             user = User.objects.get(email=email)
             uid = urlsafe_base64_encode(force_bytes(user.id))
@@ -92,7 +95,15 @@ class SendPasswordResetEmailViewSerializer(serializers.ModelSerializer):
                 'body':body,
                 'to_email':user.email
             }
-            Util.send_email(data)
+            print('test1')
+            
+            try:
+                Util.send_email(data)
+            except Exception as e:
+                print("Email send failed:", e)
+
+            # Util.send_email(data)
+            print('test5')
             return attrs
         else:
             raise ValidationError('you are not a Registered User!')
@@ -106,30 +117,30 @@ class UserPasswordResetViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['password','password2']
-        def validate(self,attrs):
-            try:
-                password = attrs.get('password')
-                password2 = attrs.get('password2')
-                uid = self.context.get('uid')
-                token = self.context.get('token')
-                print('uid,token encoded :- ',uid,token)
+    def validate(self,attrs):
+        try:
+            password = attrs.get('password')
+            password2 = attrs.get('password2')
+            uid = self.context.get('uid')
+            token = self.context.get('token')
+            print('uid,token encoded :- ',uid,token)
 
-                if password != password2:
-                    raise serializers.ValidationError("password and Confirm password doesn't match")
+            if password != password2:
+                raise serializers.ValidationError("password and Confirm password doesn't match")
 
-                id = smart_str(urlsafe_base64_decode(uid))
-                print('uid Decoded :- ',uid)
-                user = User.objects.get(id=id)
+            id = smart_str(urlsafe_base64_decode(uid))
+            print('uid Decoded :- ',uid)
+            user = User.objects.get(id=id)
 
-                if not PasswordResetTokenGenerator().check_token(user,token): # check token with new created token of the same user 
-                    raise ValidationError('Token is not Valid or Expired!')
-
-                user.set_password(password)
-                user.save()
-                return attrs
-
-            
-            # it provide more security and search more from chatgpt
-            except  DjangoUnicodeDecodeError as identifier:  
-                PasswordResetTokenGenerator.check_token(user,token)
+            if not PasswordResetTokenGenerator().check_token(user,token): # check token with new created token of the same user 
                 raise ValidationError('Token is not Valid or Expired!')
+
+            user.set_password(password)
+            user.save()
+            return attrs
+
+        
+        # it provide more security and search more from chatgpt
+        except  DjangoUnicodeDecodeError as identifier:  
+            PasswordResetTokenGenerator.check_token(user,token)
+            raise ValidationError('Token is not Valid or Expired!')

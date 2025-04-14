@@ -4,11 +4,12 @@ import os
 class Util:
     @staticmethod
     def send_email(data):
+        print('test3')
         email = EmailMessage(
             subject = data['subject'],
             body = data['body'],
             from_email = os.environ.get('EMAIL_FROM'),
             to = [data['to_email']]
         )
-        print('ankush email')
+        print('test4')
         email.send()
